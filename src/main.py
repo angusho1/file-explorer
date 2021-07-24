@@ -1,41 +1,40 @@
 #!/usr/bin/env python3
 
 import os
+import curses
 from typing import List
+from explorer.FileExplorer import FileExplorer
+from explorer.FileEntry import FileEntry, Directory
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+def main(stdscr):
+    stdscr.clear()
+    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
 
-    def disable(self):
-        self.HEADER = ''
-        self.OKBLUE = ''
-        self.OKGREEN = ''
-        self.WARNING = ''
-        self.FAIL = ''
-        self.ENDC = ''
-
-def get_files(dir):
-    items = os.listdir(dir)
-    res = []
-    for f in items:
-        if os.path.isfile(f):
-            res.append({ 'type': 'file', 'name': f })
+    fe = FileExplorer()
+    for entry in fe.get_curr_file_entries():
+        if type(entry) == Directory:
+            stdscr.addstr(f'{entry.name}\n', curses.color_pair(2))
         else:
-            res.append({ 'type': 'folder', 'name': f })
-    return res
+            stdscr.addstr(f'{entry.name}\n', curses.color_pair(1))
+    stdscr.refresh()
 
-
-def print_files(files: List[dict]):
-    for f in files:
-        color = bcolors.OKGREEN if f.get('type') == 'file' else bcolors.OKBLUE
-        print(f"{color}{f.get('name')}{bcolors.ENDC}")
+    while True:
+        stdscr.refresh()
+        k = stdscr.getch()
+        if k == ord('q'):
+            break
+        elif k == curses.KEY_UP:
+            stdscr.addstr("KEYED UP\n", curses.color_pair(1))
+        elif k == curses.KEY_DOWN:
+            stdscr.addstr("KEYED DOWN\n", curses.color_pair(1))
+        elif k == curses.KEY_LEFT:
+            stdscr.addstr("KEYED LEFT\n", curses.color_pair(1))
+        elif k == curses.KEY_RIGHT:
+            stdscr.addstr("KEYED RIGHT\n", curses.color_pair(1))
+        elif k == 10:
+            stdscr.addstr("KEYED ENTER\n", curses.color_pair(1))
 
 
 if __name__ == '__main__':
-    files = get_files('./')
-    print_files(files)
+    curses.wrapper(main)

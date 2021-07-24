@@ -1,6 +1,6 @@
 import os
 from typing import List
-from FileEntry import FileEntry, Directory
+from explorer.FileEntry import FileEntry, Directory
 
 class FileExplorer:
     """
@@ -74,6 +74,6 @@ if __name__ == "__main__":
     test2 = fe.get_selected_entry()
     fe.traverse_up()
     test3 = fe.get_selected_entry()
-    fe.traverse_right()
-    test4 = fe.get_selected_entry()
+    # fe.traverse_right()
+    # test4 = fe.get_selected_entry()
     pass
