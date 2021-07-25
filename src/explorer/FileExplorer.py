@@ -8,21 +8,8 @@ class FileExplorer:
     """
     def __init__(self) -> None:
         self.start = os.getcwd()
-        self.curr_dir_entries = self.get_curr_file_entries()
+        self.curr_dir_entries = self._get_curr_file_entries()
         self.selected_index = 0
-        self.num_entries = len(self.curr_dir_entries)
-
-    def get_curr_file_entries(self) -> List[FileEntry]:
-        """
-        Get all the files and directories in the current directory
-        """
-        traverser = os.walk('.')
-        root, dirs, files = traverser.__next__()
-
-        results = list(map(lambda dir: Directory(dir), dirs))
-        results.extend(list(map(lambda file: FileEntry(file), files)))
-
-        return results
 
     def get_selected_entry(self) -> FileEntry:
         return self.curr_dir_entries[self.selected_index]
@@ -32,7 +19,7 @@ class FileExplorer:
         Move upwards one selection in the current directory
         """
         if self.selected_index == 0:
-            self.selected_index = self.num_entries - 1
+            self.selected_index = len(self.curr_dir_entries) - 1
         else:
             self.selected_index -= 1
 
@@ -40,7 +27,7 @@ class FileExplorer:
         """
         Move downwards one selection in the current directory
         """
-        if self.selected_index == self.num_entries - 1:
+        if self.selected_index == len(self.curr_dir_entries) - 1:
             self.selected_index = 0
         else:
             self.selected_index += 1
@@ -62,10 +49,21 @@ class FileExplorer:
         os.chdir(selection.name)
         self._update_directory()
 
+    def _get_curr_file_entries(self) -> List[FileEntry]:
+        """
+        Get all the files and directories in the current directory
+        """
+        traverser = os.walk('.')
+        root, dirs, files = traverser.__next__()
+
+        results = list(map(lambda dir: Directory(dir), dirs))
+        results.extend(list(map(lambda file: FileEntry(file), files)))
+
+        return results
+
     def _update_directory(self):
-        self.curr_dir_entries = self.get_curr_file_entries()
+        self.curr_dir_entries = self._get_curr_file_entries()
         self.selected_index = 0
-        self.num_entries = len(self.curr_dir_entries)
 
 if __name__ == "__main__":
     fe = FileExplorer()
