@@ -4,6 +4,7 @@ import curses
 from typing import List
 from explorer.FileExplorer import FileExplorer
 from explorer.FileEntry import FileEntry, Directory
+from displays.DirectoryPad import DirectoryPad
 
 def main(stdscr):
     stdscr.clear()
@@ -14,41 +15,31 @@ def main(stdscr):
     curses.curs_set(0)
     stdscr.refresh()
 
+    DIR_COLOR = curses.color_pair(1)
+    FILE_COLOR = curses.color_pair(2)
+    SELECTED_COLOR = curses.color_pair(3)
+
     fe = FileExplorer()
-    curr_dir_pad = create_dir_pad(fe.curr_dir_entries)
+    curr_dir_pad = DirectoryPad(fe.curr_dir_entries)
 
     # User interaction loop
     while True:
         stdscr.refresh()
         k = stdscr.getch()
         if k == curses.KEY_UP:
-            curr_dir_pad.addstr("KEYED UP\n", curses.color_pair(1))
+            fe.traverse_up()
+            curr_dir_pad.traverse_up()
         elif k == curses.KEY_DOWN:
-            curr_dir_pad.addstr("KEYED DOWN\n", curses.color_pair(1))
+            fe.traverse_down()
+            curr_dir_pad.traverse_down()
         elif k == curses.KEY_LEFT:
-            curr_dir_pad.addstr("KEYED LEFT\n", curses.color_pair(1))
+            curr_dir_pad.addstr("KEYED LEFT\n", DIR_COLOR)
         elif k == curses.KEY_RIGHT:
-            curr_dir_pad.addstr("KEYED RIGHT\n", curses.color_pair(1))
+            curr_dir_pad.addstr("KEYED RIGHT\n", DIR_COLOR)
         elif k == 10:
-            curr_dir_pad.addstr("KEYED ENTER\n", curses.color_pair(1))
+            curr_dir_pad.addstr("KEYED ENTER\n", DIR_COLOR)
         if k == ord('q'):
             break
-
-
-def create_dir_pad(file_entries: List[FileEntry]) -> curses.window:
-    num_entries = len(file_entries)
-    max_filename_length = len(max(file_entries, key=lambda x: len(x.name)).name)
-    pad = curses.newpad(num_entries+1, max_filename_length+1)
-    cursor_coords = curses.getsyx()
-    for i, entry in enumerate(file_entries):
-        if cursor_coords[0] == i:
-            pad.addstr(f'{entry.name}\n', curses.color_pair(3))
-        elif type(entry) == Directory:
-            pad.addstr(f'{entry.name}\n', curses.color_pair(1))
-        else:
-            pad.addstr(f'{entry.name}\n', curses.color_pair(2))
-    pad.refresh(0,0,  0,0,  num_entries, max_filename_length)
-    return pad
 
 
 if __name__ == '__main__':
