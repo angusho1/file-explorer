@@ -21,7 +21,7 @@ def main(stdscr):
 
     fe = FileExplorer()
     curr_dir_pad = DirectoryPad(fe)
-    curr_dir_pad.go_to_start()
+    curr_dir_pad.select_file(0)
 
     # User interaction loop
     while True:
@@ -29,10 +29,8 @@ def main(stdscr):
         k = stdscr.getch()
         if k == curses.KEY_UP:
             curr_dir_pad.traverse_up()
-            fe.traverse_up()
         elif k == curses.KEY_DOWN:
             curr_dir_pad.traverse_down()
-            fe.traverse_down()
         elif k == curses.KEY_LEFT:
             stdscr.addstr("KEYED LEFT\n", DIR_COLOR)
         elif k == curses.KEY_RIGHT:

@@ -19,9 +19,7 @@ class DirectoryPad:
     def draw(self):
         cursor_coords = curses.getsyx()
         for i, entry in enumerate(self.file_entries):
-            if cursor_coords[0] == i:
-                self.pad.addstr(f'{entry.name}\n', self.SELECTED_COLOR)
-            elif type(entry) == Directory:
+            if type(entry) == Directory:
                 self.pad.addstr(f'{entry.name}\n', self.DIR_COLOR)
             else:
                 self.pad.addstr(f'{entry.name}\n', self.FILE_COLOR)
@@ -36,14 +34,16 @@ class DirectoryPad:
     def traverse_down(self):
         cursor_coords = curses.getsyx()
         self.deselect_curr_file()
-        self.pad.move(cursor_coords[0]+1, cursor_coords[1])
+        new_index = self.file_explorer.traverse_down()
+        self.pad.move(new_index, cursor_coords[1])
         self.pad.chgat(self.SELECTED_COLOR)
         self.noutrefresh()
 
     def traverse_up(self):
         cursor_coords = curses.getsyx()
         self.deselect_curr_file()
-        self.pad.move(cursor_coords[0]-1, cursor_coords[1])
+        new_index = self.file_explorer.traverse_up()
+        self.pad.move(new_index, cursor_coords[1])
         self.pad.chgat(self.SELECTED_COLOR)
         self.noutrefresh()
 
@@ -53,16 +53,21 @@ class DirectoryPad:
     def get_max_filename_len(self) -> int:
         return len(max(self.file_entries, key=lambda x: len(x.name)).name)
 
+    def select_file(self, row: int):
+        selected_file = self.file_explorer.select_by_index(row)
+        if selected_file is None:
+            pass
+        else:
+            self.pad.move(row, 0)
+            self.pad.chgat(self.SELECTED_COLOR)
+            self.noutrefresh()
+
     def deselect_curr_file(self):
         curr_file = self.file_explorer.get_selected_entry()
         if type(curr_file) == Directory:
             self.pad.chgat(self.DIR_COLOR)
         else:
             self.pad.chgat(self.FILE_COLOR)
-
-    def go_to_start(self):
-        self.pad.move(0,0)
-        self.noutrefresh()
 
     def _create_pad(self):
         num_entries = self.get_num_entries()

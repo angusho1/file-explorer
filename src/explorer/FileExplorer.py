@@ -14,23 +14,35 @@ class FileExplorer:
     def get_selected_entry(self) -> FileEntry:
         return self.curr_dir_entries[self.selected_index]
 
-    def traverse_up(self):
+    def select_by_index(self, index: int) -> FileEntry:
         """
-        Move upwards one selection in the current directory
+        Set the file entry at the given index as the current file entry, and return the file entry. Returns None if the index is out of bounds.
+        """
+        if (index < 0 or index >= len(self.curr_dir_entries)):
+            return None
+        else:
+            self.select_by_index = index
+            return self.get_selected_entry()
+
+    def traverse_up(self) -> int:
+        """
+        Move upwards one selection in the current directory. Returns the index of the currently selected file entry.
         """
         if self.selected_index == 0:
             self.selected_index = len(self.curr_dir_entries) - 1
         else:
             self.selected_index -= 1
+        return self.selected_index
 
-    def traverse_down(self):
+    def traverse_down(self) -> int:
         """
-        Move downwards one selection in the current directory
+        Move downwards one selection in the current directory. Returns the index of the currently selected file entry.
         """
         if self.selected_index == len(self.curr_dir_entries) - 1:
             self.selected_index = 0
         else:
             self.selected_index += 1
+        return self.selected_index
 
     def traverse_left(self):
         """
