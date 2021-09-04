@@ -2,9 +2,9 @@
 
 import curses
 from typing import List
-from explorer.FileExplorer import FileExplorer
-from explorer.FileEntry import FileEntry, Directory
-from displays.DirectoryPad import DirectoryPad
+from src.explorer.FileExplorer import FileExplorer
+from src.explorer.FileEntry import FileEntry, Directory
+from src.displays.DirectoryPad import DirectoryPad
 
 def main():
     curses.wrapper(start)

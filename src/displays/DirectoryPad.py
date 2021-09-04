@@ -1,7 +1,7 @@
 import curses
 from typing import List
-from explorer.FileEntry import FileEntry, Directory
-from explorer.FileExplorer import FileExplorer
+from src.explorer.FileEntry import FileEntry, Directory
+from src.explorer.FileExplorer import FileExplorer
 
 
 class DirectoryPad:

@@ -1,6 +1,6 @@
 import os
 from typing import List
-from explorer.FileEntry import FileEntry, Directory
+from src.explorer.FileEntry import FileEntry, Directory
 
 class FileExplorer:
     """
