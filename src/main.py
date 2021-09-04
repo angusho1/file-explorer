@@ -6,7 +6,10 @@ from explorer.FileExplorer import FileExplorer
 from explorer.FileEntry import FileEntry, Directory
 from displays.DirectoryPad import DirectoryPad
 
-def main(stdscr):
+def main():
+    curses.wrapper(start)
+
+def start(stdscr):
     stdscr.clear()
     curses.use_default_colors()
     curses.init_pair(1, curses.COLOR_MAGENTA, -1)
@@ -41,5 +44,5 @@ def main(stdscr):
             break
 
 
-if __name__ == '__main__':
-    curses.wrapper(main)
+# if __name__ == '__main__':
+#     curses.wrapper(main)
