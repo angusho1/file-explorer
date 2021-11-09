@@ -1,6 +1,7 @@
 import os
 from typing import List
 from src.explorer.FileEntry import FileEntry, Directory
+import pyperclip
 
 class FileExplorer:
     """
@@ -60,6 +61,16 @@ class FileExplorer:
             raise Exception('Cannot traverse a file')
         os.chdir(selection.name)
         self._update_directory()
+
+    def copy_path(self) -> Directory:
+        """
+        Copy the relative path of the currently selected directory
+        """
+        selection = self.get_selected_entry()
+        if type(selection) == Directory:
+            pyperclip.copy(f'cd {selection.name}')
+            return selection
+        return None
 
     def _get_curr_file_entries(self) -> List[FileEntry]:
         """

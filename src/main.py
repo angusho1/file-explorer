@@ -39,10 +39,7 @@ def start(stdscr):
         elif k == curses.KEY_RIGHT:
             stdscr.addstr("KEYED RIGHT\n", DIR_COLOR)
         elif k == 10:
-            stdscr.addstr("KEYED ENTER\n", DIR_COLOR)
+            fe.copy_path()
+            break
         if k == ord('q'):
             break
-
-
-# if __name__ == '__main__':
-#     curses.wrapper(main)

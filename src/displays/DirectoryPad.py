@@ -2,6 +2,7 @@ import curses
 from typing import List
 from src.explorer.FileEntry import FileEntry, Directory
 from src.explorer.FileExplorer import FileExplorer
+import pyperclip
 
 
 class DirectoryPad:
@@ -17,6 +18,9 @@ class DirectoryPad:
         self.draw()
     
     def draw(self):
+        """
+        Render the file entries for the the current directory
+        """
         cursor_coords = curses.getsyx()
         for i, entry in enumerate(self.file_entries):
             if type(entry) == Directory:
@@ -29,9 +33,15 @@ class DirectoryPad:
         self.pad.refresh(0,0,  0,0, self.get_num_entries(), self.max_filename_len)
 
     def noutrefresh(self):
+        """
+        Mark the pad for refresh. curses.doUpdate() must be called afterwards for the refresh to take place.
+        """
         self.pad.noutrefresh(0,0,  0,0, self.get_num_entries(), self.max_filename_len)
 
     def traverse_down(self):
+        """
+        Deselect the current highlighted file entry, move the cursor to the following entry, and highlight it.
+        """
         cursor_coords = curses.getsyx()
         self.deselect_curr_file()
         new_index = self.file_explorer.traverse_down()
@@ -40,6 +50,9 @@ class DirectoryPad:
         self.noutrefresh()
 
     def traverse_up(self):
+        """
+        Deselect the current highlighted file entry, move the cursor to the previous entry, and highlight it.
+        """
         cursor_coords = curses.getsyx()
         self.deselect_curr_file()
         new_index = self.file_explorer.traverse_up()
