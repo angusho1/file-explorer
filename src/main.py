@@ -43,3 +43,6 @@ def start(stdscr):
             break
         if k == ord('q'):
             break
+
+if __name__ == '__main__':
+    main()

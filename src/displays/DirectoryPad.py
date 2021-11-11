@@ -12,7 +12,7 @@ class DirectoryPad:
         self.SELECTED_COLOR = curses.color_pair(3)
 
         self.file_explorer = file_explorer
-        self.file_entries = file_explorer.curr_dir_entries
+        self.file_entries = file_explorer.get_curr_file_entries()
         self.max_filename_len = self.get_max_filename_len()
         self.pad = self._create_pad()
         self.draw()
