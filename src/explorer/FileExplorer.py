@@ -49,18 +49,31 @@ class FileExplorer:
         """
         Move backwards to the parent directory
         """
+        current_dir = self.curr_directory
         os.chdir('../')
-        self._update_directory()
+        if self.curr_directory.parent is None:
+            self.curr_directory = Directory()
+            self.curr_directory.traverse_contents(current_dir)
+        else:
+            self.curr_directory = self.curr_directory.parent
 
     def traverse_right(self):
         """
         Move into the currently selected directory
+
+        Raises an exception if the current selection is not a directory
         """
         selection = self.get_selected_entry()
+        parent = self.curr_directory
+
         if type(selection) != Directory:
             raise Exception('Cannot traverse a file')
         os.chdir(selection.name)
-        self._update_directory()
+        if selection.parent is None:
+            selection.set_parent(parent)
+        self.curr_directory = selection
+        self.curr_directory.traverse_contents()
+        self.selected_index = 0
 
     def copy_path(self) -> Directory:
         """
@@ -77,29 +90,17 @@ class FileExplorer:
         """
         Get the current Directory object, creating it if it doesn't exist
         """
-        curr_dir = Directory(*os.path.split(os.getcwd()))
-        traverser = os.walk('.')
-        root, dirs, files = traverser.__next__()
-
-        results = list(map(lambda dir: Directory(curr_dir.path, dir), dirs))
-        results.extend(list(map(lambda file: FileEntry(curr_dir.path, file), files)))
-        curr_dir.set_children(results)
-        return curr_dir
+        if not hasattr(self, 'curr_directory') or self.curr_directory.path != os.getcwd():
+            curr_dir = Directory()
+            curr_dir.traverse_contents()
+            return curr_dir
+        else:
+            return self.curr_directory
 
     def get_curr_file_entries(self) -> List[FileEntry]:
         return self.curr_directory.children
 
-    def _update_directory(self):
-        self.curr_directory = self._get_curr_directory()
-        self.selected_index = 0
-
 if __name__ == "__main__":
     fe = FileExplorer()
-    test1 = fe.get_selected_entry()
-    fe.traverse_up()
-    test2 = fe.get_selected_entry()
-    fe.traverse_up()
-    test3 = fe.get_selected_entry()
-    # fe.traverse_right()
-    # test4 = fe.get_selected_entry()
+    fe.traverse_left()
     pass
