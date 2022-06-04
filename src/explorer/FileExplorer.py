@@ -5,7 +5,15 @@ import pyperclip
 
 class FileExplorer:
     """
-    Central object for traversing the file system and maintaining state about currently selected files and folders
+    Central class for traversing the file system and maintaining state about currently selected
+    files and folders
+
+    Attributes:
+
+    - start : :class:`str` --> the absolute file path for the directory upon initialization
+    - curr_directory : :class:`Directory` --> the current directory the program is running in
+    - selected_index : :class:`int` --> index of the currently selected file entry, inside the
+    curr_directory
     """
     def __init__(self) -> None:
         self.start = os.getcwd()
@@ -17,7 +25,12 @@ class FileExplorer:
 
     def select_by_index(self, index: int) -> FileEntry:
         """
-        Set the file entry at the given index as the current file entry, and return the file entry. Returns None if the index is out of bounds.
+        Set the file entry at the given index as the current file entry, and return the file
+        entry. Returns None if the index is out of bounds.
+
+        Parameters:
+
+        - index: :class:`int` --> the index of the file entry to select
         """
         if (index < 0 or index >= len(self.curr_directory.children)):
             return None
@@ -27,7 +40,8 @@ class FileExplorer:
 
     def traverse_up(self) -> int:
         """
-        Move upwards one selection in the current directory. Returns the index of the currently selected file entry.
+        Move upwards one selection in the current directory. Returns the index of the currently
+        selected file entry.
         """
         if self.selected_index == 0:
             self.selected_index = len(self.curr_directory.children) - 1
@@ -37,7 +51,8 @@ class FileExplorer:
 
     def traverse_down(self) -> int:
         """
-        Move downwards one selection in the current directory. Returns the index of the currently selected file entry.
+        Move downwards one selection in the current directory. Returns the index of the currently
+        selected file entry.
         """
         if self.selected_index == len(self.curr_directory.children) - 1:
             self.selected_index = 0
@@ -87,9 +102,7 @@ class FileExplorer:
         return None
 
     def _get_curr_directory(self) -> Directory:
-        """
-        Get the current Directory object, creating it if it doesn't exist
-        """
+        # Get the current Directory object, creating it if it doesn't exist
         if not hasattr(self, 'curr_directory') or self.curr_directory.path != os.getcwd():
             curr_dir = Directory()
             curr_dir.traverse_contents()
@@ -98,6 +111,9 @@ class FileExplorer:
             return self.curr_directory
 
     def get_curr_file_entries(self) -> List[FileEntry]:
+        """
+        Returns the list of file entries in the current directory
+        """
         return self.curr_directory.children
 
 if __name__ == "__main__":

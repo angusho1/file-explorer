@@ -28,8 +28,8 @@ def start(stdscr):
 
     # User interaction loop
     while True:
-        curses.doupdate()
-        k = stdscr.getch()
+        curses.doupdate()   # Change physical screen to match previous update
+        k = stdscr.getch()  # Wait for user to hit key
         if k == curses.KEY_UP:
             curr_dir_pad.traverse_up()
         elif k == curses.KEY_DOWN:

@@ -6,13 +6,23 @@ import pyperclip
 
 
 class DirectoryPad:
+    """
+    A view of the files in a directory built using a curses pad.
+
+    Attributes:
+
+    - file_explorer : :class:`FileExplorer` --> the FileExplorer object used to read file entries for the current directory
+    - directory : :class:`Directory` --> the directory being rendered in this view
+    - max_filename_len : :class:`int` --> the length of the longest filename in the file entries list for this directory
+    - pad --> the curses pad
+    """
     def __init__(self, file_explorer: FileExplorer) -> None:
         self.DIR_COLOR = curses.color_pair(1)
         self.FILE_COLOR = curses.color_pair(2)
         self.SELECTED_COLOR = curses.color_pair(3)
 
         self.file_explorer = file_explorer
-        self.file_entries = file_explorer.get_curr_file_entries()
+        self.directory = file_explorer.curr_directory
         self.max_filename_len = self.get_max_filename_len()
         self.pad = self._create_pad()
         self.draw()
@@ -22,7 +32,7 @@ class DirectoryPad:
         Render the file entries for the the current directory
         """
         cursor_coords = curses.getsyx()
-        for i, entry in enumerate(self.file_entries):
+        for i, entry in enumerate(self._get_file_entries()):
             if type(entry) == Directory:
                 self.pad.addstr(f'{entry.name}\n', self.DIR_COLOR)
             else:
@@ -34,16 +44,18 @@ class DirectoryPad:
 
     def noutrefresh(self):
         """
-        Mark the pad for refresh. curses.doUpdate() must be called afterwards for the refresh to take place.
+        Mark the pad for refresh. curses.doUpdate() must be called afterwards for the refresh to
+        take place.
         """
         self.pad.noutrefresh(0,0,  0,0, self.get_num_entries(), self.max_filename_len)
 
     def traverse_down(self):
         """
-        Deselect the current highlighted file entry, move the cursor to the following entry, and highlight it.
+        Deselect the current highlighted file entry, move the cursor to the following entry,
+        and highlight it.
         """
         cursor_coords = curses.getsyx()
-        self.deselect_curr_file()
+        self._deselect_curr_file()
         new_index = self.file_explorer.traverse_down()
         self.pad.move(new_index, cursor_coords[1])
         self.pad.chgat(self.SELECTED_COLOR)
@@ -51,20 +63,21 @@ class DirectoryPad:
 
     def traverse_up(self):
         """
-        Deselect the current highlighted file entry, move the cursor to the previous entry, and highlight it.
+        Deselect the current highlighted file entry, move the cursor to the previous entry,
+        and highlight it.
         """
         cursor_coords = curses.getsyx()
-        self.deselect_curr_file()
+        self._deselect_curr_file()
         new_index = self.file_explorer.traverse_up()
         self.pad.move(new_index, cursor_coords[1])
         self.pad.chgat(self.SELECTED_COLOR)
         self.noutrefresh()
 
     def get_num_entries(self) -> int:
-        return len(self.file_entries)
+        return len(self._get_file_entries())
 
     def get_max_filename_len(self) -> int:
-        return len(max(self.file_entries, key=lambda x: len(x.name)).name)
+        return len(max(self._get_file_entries(), key=lambda x: len(x.name)).name)
 
     def select_file(self, row: int):
         selected_file = self.file_explorer.select_by_index(row)
@@ -75,7 +88,8 @@ class DirectoryPad:
             self.pad.chgat(self.SELECTED_COLOR)
             self.noutrefresh()
 
-    def deselect_curr_file(self):
+    def _deselect_curr_file(self):
+        # Remove the selection highlight from the currently selected file
         curr_file = self.file_explorer.get_selected_entry()
         if type(curr_file) == Directory:
             self.pad.chgat(self.DIR_COLOR)
@@ -83,9 +97,14 @@ class DirectoryPad:
             self.pad.chgat(self.FILE_COLOR)
 
     def _create_pad(self):
+        # Create a new pad with size based on number of file entries and the longest file name in
+        # the file entry list
         num_entries = self.get_num_entries()
         max_filename_length = self.max_filename_len
         return curses.newpad(num_entries+1, max_filename_length+1)
+
+    def _get_file_entries(self):
+        return self.directory.children
 
 
 
