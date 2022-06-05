@@ -67,8 +67,9 @@ class FileExplorer:
         current_dir = self.curr_directory
         os.chdir('../')
         if self.curr_directory.parent is None:
-            self.curr_directory = Directory()
-            self.curr_directory.traverse_contents(current_dir)
+            parent_dir = Directory()
+            parent_dir.traverse_contents(current_dir)
+            self.curr_directory = parent_dir
         else:
             self.curr_directory = self.curr_directory.parent
 
@@ -118,5 +119,8 @@ class FileExplorer:
 
 if __name__ == "__main__":
     fe = FileExplorer()
+    fe.traverse_right()
+    fe.traverse_left()
+    fe.traverse_left()
     fe.traverse_left()
     pass

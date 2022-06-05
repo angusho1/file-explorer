@@ -41,6 +41,7 @@ class Directory(FileEntry):
             super().__init__(*os.path.split(os.getcwd()))
         else:
             super().__init__(dir, name, parent)
+        self.children = None
 
     def _set_children(self, children: List[FileEntry]) -> None:
         self.children = children
@@ -71,7 +72,7 @@ class Directory(FileEntry):
         self._set_children(results)
 
 def create_dir_child(dir, name, parent: Directory, existing_child: FileEntry) -> Directory:
-    if os.path.join(dir, name) == existing_child.path:
+    if os.path.join(dir, name) == existing_child.get_path():
         existing_child.set_parent(parent)
         return existing_child
     else:
