@@ -14,6 +14,7 @@ class DirectoryPad:
     - file_explorer : :class:`FileExplorer` --> the FileExplorer object used to read file entries for the current directory
     - directory : :class:`Directory` --> the directory being rendered in this view
     - max_filename_len : :class:`int` --> the length of the longest filename in the file entries list for this directory
+    - start_index : :class:`int` --> the row to start rendering at
     - pad --> the curses pad
     """
     def __init__(self, file_explorer: FileExplorer) -> None:
@@ -24,6 +25,7 @@ class DirectoryPad:
         self.file_explorer = file_explorer
         self.directory = file_explorer.curr_directory
         self.max_filename_len = self.get_max_filename_len()
+        self.start_index = 0
         self.pad = self._create_pad()
         self.draw()
     
@@ -47,7 +49,10 @@ class DirectoryPad:
         Mark the pad for refresh. curses.doUpdate() must be called afterwards for the refresh to
         take place.
         """
-        self.pad.noutrefresh(0,0,  0,0, self.get_num_entries(), self.max_filename_len)
+        total_entries = self.get_num_entries()
+        num_rows_to_display = total_entries-1 if total_entries <= curses.LINES else curses.LINES-1
+        # (upper-left of pad start, upper-left of window, lower-right of window)
+        self.pad.noutrefresh(self.start_index,0,  0,0, num_rows_to_display, self.max_filename_len)
 
     def traverse_down(self):
         """
@@ -57,9 +62,10 @@ class DirectoryPad:
         cursor_coords = curses.getsyx()
         self._deselect_curr_file()
         new_index = self.file_explorer.traverse_down()
-        self.pad.move(new_index, cursor_coords[1])
+        self.pad.move(new_index, cursor_coords[1])  # Move cursor vertically
         self.pad.chgat(self.SELECTED_COLOR)
-        self.noutrefresh()
+        self._update_start_index(new_index)
+        self.noutrefresh()  # Mark for refresh
 
     def traverse_up(self):
         """
@@ -69,9 +75,10 @@ class DirectoryPad:
         cursor_coords = curses.getsyx()
         self._deselect_curr_file()
         new_index = self.file_explorer.traverse_up()
-        self.pad.move(new_index, cursor_coords[1])
+        self.pad.move(new_index, cursor_coords[1])  # Move cursor vertically
         self.pad.chgat(self.SELECTED_COLOR)
-        self.noutrefresh()
+        self._update_start_index(new_index)
+        self.noutrefresh()  # Mark for refresh
 
     def get_num_entries(self) -> int:
         return len(self._get_file_entries())
@@ -106,6 +113,12 @@ class DirectoryPad:
     def _get_file_entries(self):
         return self.directory.children
 
+    def _update_start_index(self, new_index: int):
+        # Shift the file entry list up or down if it doesn't fit entirely within the screen
+        if new_index - self.start_index >= curses.LINES:
+            self.start_index = new_index - curses.LINES + 1
+        elif new_index < self.start_index:
+            self.start_index = new_index
 
 
     
