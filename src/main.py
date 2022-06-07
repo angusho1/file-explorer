@@ -5,6 +5,7 @@ from typing import List
 from src.explorer.FileExplorer import FileExplorer
 from src.explorer.FileEntry import FileEntry, Directory
 from src.displays.DirectoryPad import DirectoryPad
+from src.displays.PadList import PadList
 
 def main():
     curses.wrapper(start)
@@ -23,21 +24,20 @@ def start(stdscr):
     SELECTED_COLOR = curses.color_pair(3)
 
     fe = FileExplorer()
-    curr_dir_pad = DirectoryPad(fe)
-    curr_dir_pad.select_file(0)
+    directory_view = PadList(fe)
 
     # User interaction loop
     while True:
         curses.doupdate()   # Change physical screen to match previous update
         k = stdscr.getch()  # Wait for user to hit key
         if k == curses.KEY_UP:
-            curr_dir_pad.traverse_up()
+            directory_view.traverse_up()
         elif k == curses.KEY_DOWN:
-            curr_dir_pad.traverse_down()
+            directory_view.traverse_down()
         elif k == curses.KEY_LEFT:
-            stdscr.addstr("KEYED LEFT\n", DIR_COLOR)
+            directory_view.traverse_left()
         elif k == curses.KEY_RIGHT:
-            stdscr.addstr("KEYED RIGHT\n", DIR_COLOR)
+            directory_view.traverse_right()
         elif k == 10:
             fe.copy_path()
             break

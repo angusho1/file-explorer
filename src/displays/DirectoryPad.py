@@ -17,18 +17,16 @@ class DirectoryPad:
     - start_index : :class:`int` --> the row to start rendering at
     - pad --> the curses pad
     """
-    def __init__(self, file_explorer: FileExplorer) -> None:
+    def __init__(self, directory: Directory) -> None:
         self.DIR_COLOR = curses.color_pair(1)
         self.FILE_COLOR = curses.color_pair(2)
         self.SELECTED_COLOR = curses.color_pair(3)
 
-        self.file_explorer = file_explorer
-        self.directory = file_explorer.curr_directory
+        self.directory = directory
         self.max_filename_len = self.get_max_filename_len()
         self.start_index = 0
         self.pad = self._create_pad()
-        self.draw()
-    
+
     def draw(self):
         """
         Render the file entries for the the current directory
@@ -41,9 +39,6 @@ class DirectoryPad:
                 self.pad.addstr(f'{entry.name}\n', self.FILE_COLOR)
         self.noutrefresh()
 
-    def refresh(self):
-        self.pad.refresh(0,0,  0,0, self.get_num_entries(), self.max_filename_len)
-
     def noutrefresh(self):
         """
         Mark the pad for refresh. curses.doUpdate() must be called afterwards for the refresh to
@@ -54,30 +49,14 @@ class DirectoryPad:
         # (upper-left of pad start, upper-left of window, lower-right of window)
         self.pad.noutrefresh(self.start_index,0,  0,0, num_rows_to_display, self.max_filename_len)
 
-    def traverse_down(self):
+    def select_at_index(self, curr_index: int):
         """
-        Deselect the current highlighted file entry, move the cursor to the following entry,
-        and highlight it.
-        """
-        cursor_coords = curses.getsyx()
-        self._deselect_curr_file()
-        new_index = self.file_explorer.traverse_down()
-        self.pad.move(new_index, cursor_coords[1])  # Move cursor vertically
-        self.pad.chgat(self.SELECTED_COLOR)
-        self._update_start_index(new_index)
-        self.noutrefresh()  # Mark for refresh
-
-    def traverse_up(self):
-        """
-        Deselect the current highlighted file entry, move the cursor to the previous entry,
-        and highlight it.
+        Highlight the row of the file at curr_index
         """
         cursor_coords = curses.getsyx()
-        self._deselect_curr_file()
-        new_index = self.file_explorer.traverse_up()
-        self.pad.move(new_index, cursor_coords[1])  # Move cursor vertically
+        self.pad.move(curr_index, cursor_coords[1])  # Move cursor vertically
         self.pad.chgat(self.SELECTED_COLOR)
-        self._update_start_index(new_index)
+        self._update_start_index(curr_index)
         self.noutrefresh()  # Mark for refresh
 
     def get_num_entries(self) -> int:
@@ -86,18 +65,8 @@ class DirectoryPad:
     def get_max_filename_len(self) -> int:
         return len(max(self._get_file_entries(), key=lambda x: len(x.name)).name)
 
-    def select_file(self, row: int):
-        selected_file = self.file_explorer.select_by_index(row)
-        if selected_file is None:
-            pass
-        else:
-            self.pad.move(row, 0)
-            self.pad.chgat(self.SELECTED_COLOR)
-            self.noutrefresh()
-
-    def _deselect_curr_file(self):
+    def deselect_file(self, curr_file: FileEntry):
         # Remove the selection highlight from the currently selected file
-        curr_file = self.file_explorer.get_selected_entry()
         if type(curr_file) == Directory:
             self.pad.chgat(self.DIR_COLOR)
         else:
@@ -119,6 +88,4 @@ class DirectoryPad:
             self.start_index = new_index - curses.LINES + 1
         elif new_index < self.start_index:
             self.start_index = new_index
-
-
     
