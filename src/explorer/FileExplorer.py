@@ -91,6 +91,24 @@ class FileExplorer:
         self.curr_directory.traverse_contents()
         self.selected_index = 0
 
+    def peek_right(self) -> bool:
+        """
+        If the currently selected file entry is a directory, parse it using the FileExplorer object.
+
+        Returns true if a directory was parsed, false otherwise
+        """
+        selection = self.get_selected_entry()
+        parent = self.curr_directory
+
+        if type(selection) != Directory:
+            return False
+        os.chdir(selection.name)
+        if selection.parent is None:
+            selection.set_parent(parent)
+        selection.traverse_contents()
+        os.chdir('../')
+        return True
+
     def copy_path(self) -> Directory:
         """
         Copy the relative path of the currently selected directory

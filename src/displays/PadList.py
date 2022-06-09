@@ -19,6 +19,7 @@ class PadList:
         self.dir_pads = []
         self.current = 0
         self._init_dir_pads()
+        self.refresh()
 
     def traverse_up(self):
         """
@@ -29,6 +30,9 @@ class PadList:
         curr_dir_pad = self.get_current_dir_pad()
         curr_dir_pad.deselect_file(prev_selected_file)
         curr_dir_pad.select_at_index(new_index)
+        self._clear_peek_directory()
+        self._init_child_dir()
+        self.refresh()
 
     def traverse_down(self):
         """
@@ -39,6 +43,9 @@ class PadList:
         curr_dir_pad = self.get_current_dir_pad()
         curr_dir_pad.deselect_file(prev_selected_file)
         curr_dir_pad.select_at_index(new_index)
+        self._clear_peek_directory()
+        self._init_child_dir()
+        self.refresh()
 
     def traverse_left(self):
         """
@@ -60,8 +67,34 @@ class PadList:
         """
         return self.dir_pads[self.current]
 
+    def refresh(self):
+        offset = 0
+        dp: DirectoryPad
+        for i, dp in enumerate(self.dir_pads):
+            if i == self.current:
+                dp.select_at_index(self.fe.selected_index)
+            dp.set_offset(offset)
+            if not dp.is_drawn():
+                dp.draw()
+            offset += dp.get_width()
+
+    def _clear_peek_directory(self):
+        if len(self.dir_pads) > self.current + 1:
+            prev_child_dir_pad = self.dir_pads.pop()
+            prev_child_dir_pad.clear()
+
     def _init_dir_pads(self):
+        # Create the first directory pad and highlight the first entry
+        # Then, create the first child directory pad
         first_dir_pad = DirectoryPad(self.fe.curr_directory)
-        self.dir_pads.append(first_dir_pad)
-        first_dir_pad.draw()
         first_dir_pad.select_at_index(self.fe.selected_index)
+        self.dir_pads.append(first_dir_pad)
+        self._init_child_dir()
+
+    def _init_child_dir(self):
+        # If the currently selected file is a directory, show a preview of it to the right
+        is_dir = self.fe.peek_right()
+        if is_dir:
+            selected_dir = self.fe.get_selected_entry()
+            peek_dir_pad = DirectoryPad(selected_dir)
+            self.dir_pads.append(peek_dir_pad)

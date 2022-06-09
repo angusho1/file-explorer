@@ -13,8 +13,10 @@ class DirectoryPad:
 
     - file_explorer : :class:`FileExplorer` --> the FileExplorer object used to read file entries for the current directory
     - directory : :class:`Directory` --> the directory being rendered in this view
-    - max_filename_len : :class:`int` --> the length of the longest filename in the file entries list for this directory
+    - width : :class:`int` --> the total width (columns) for this directory pad, based on the
+    longest filename in the directory
     - start_index : :class:`int` --> the row to start rendering at
+    - offset : :class:`int` --> the column to start rendering at
     - pad --> the curses pad
     """
     def __init__(self, directory: Directory) -> None:
@@ -23,20 +25,21 @@ class DirectoryPad:
         self.SELECTED_COLOR = curses.color_pair(3)
 
         self.directory = directory
-        self.max_filename_len = self.get_max_filename_len()
+        self.width = self.get_width()
         self.start_index = 0
+        self.offset = 0
         self.pad = self._create_pad()
 
     def draw(self):
         """
         Render the file entries for the the current directory
         """
-        cursor_coords = curses.getsyx()
         for i, entry in enumerate(self._get_file_entries()):
             if type(entry) == Directory:
                 self.pad.addstr(f'{entry.name}\n', self.DIR_COLOR)
             else:
                 self.pad.addstr(f'{entry.name}\n', self.FILE_COLOR)
+        self.drawn = True
         self.noutrefresh()
 
     def noutrefresh(self):
@@ -47,14 +50,14 @@ class DirectoryPad:
         total_entries = self.get_num_entries()
         num_rows_to_display = total_entries-1 if total_entries <= curses.LINES else curses.LINES-1
         # (upper-left of pad start, upper-left of window, lower-right of window)
-        self.pad.noutrefresh(self.start_index,0,  0,0, num_rows_to_display, self.max_filename_len)
+        self.pad.noutrefresh(self.start_index, 0,  0,self.offset, curses.LINES-1, self.width
+                             - 1 + self.offset)
 
     def select_at_index(self, curr_index: int):
         """
         Highlight the row of the file at curr_index
         """
-        cursor_coords = curses.getsyx()
-        self.pad.move(curr_index, cursor_coords[1])  # Move cursor vertically
+        self.pad.move(curr_index, self.offset)  # Move cursor vertically
         self.pad.chgat(self.SELECTED_COLOR)
         self._update_start_index(curr_index)
         self.noutrefresh()  # Mark for refresh
@@ -62,8 +65,11 @@ class DirectoryPad:
     def get_num_entries(self) -> int:
         return len(self._get_file_entries())
 
-    def get_max_filename_len(self) -> int:
-        return len(max(self._get_file_entries(), key=lambda x: len(x.name)).name)
+    def get_width(self) -> int:
+        return self._get_max_filename_len() + 1
+
+    def set_offset(self, offset: int):
+        self.offset = offset
 
     def deselect_file(self, curr_file: FileEntry):
         # Remove the selection highlight from the currently selected file
@@ -72,12 +78,22 @@ class DirectoryPad:
         else:
             self.pad.chgat(self.FILE_COLOR)
 
+    def is_drawn(self):
+        return hasattr(self, 'drawn')
+
+    def clear(self):
+        self.pad.move(0, self.offset)
+        self.pad.clear()
+        self.noutrefresh()
+
+    def _get_max_filename_len(self) -> int:
+        return len(max(self._get_file_entries(), key=lambda x: len(x.name)).name)
+
     def _create_pad(self):
         # Create a new pad with size based on number of file entries and the longest file name in
         # the file entry list
         num_entries = self.get_num_entries()
-        max_filename_length = self.max_filename_len
-        return curses.newpad(num_entries+1, max_filename_length+1)
+        return curses.newpad(num_entries+1, self.width)
 
     def _get_file_entries(self):
         return self.directory.children
