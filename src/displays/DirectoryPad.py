@@ -34,6 +34,8 @@ class DirectoryPad:
         """
         Render the file entries for the the current directory
         """
+        self.pad.move(0, 0)
+        self.pad.clear()
         for i, entry in enumerate(self._get_file_entries()):
             if type(entry) == Directory:
                 self.pad.addstr(f'{entry.name}\n', self.DIR_COLOR)
@@ -57,7 +59,8 @@ class DirectoryPad:
         """
         Highlight the row of the file at curr_index
         """
-        self.pad.move(curr_index, self.offset)  # Move cursor vertically
+        # NOTE: coords for window.move methods are relative to the window's position
+        self.pad.move(curr_index, 0)  # Move cursor vertically
         self.pad.chgat(self.SELECTED_COLOR)
         self._update_start_index(curr_index)
         self.noutrefresh()  # Mark for refresh
@@ -82,12 +85,13 @@ class DirectoryPad:
         return hasattr(self, 'drawn')
 
     def clear(self):
-        self.pad.move(0, self.offset)
+        self.pad.move(0, 0)
         self.pad.clear()
         self.noutrefresh()
 
     def _get_max_filename_len(self) -> int:
-        return len(max(self._get_file_entries(), key=lambda x: len(x.name)).name)
+        longest_name_file = max(self._get_file_entries(), key=lambda x: len(x.name), default=None)
+        return len(longest_name_file.name) if longest_name_file is not None else 0
 
     def _create_pad(self):
         # Create a new pad with size based on number of file entries and the longest file name in

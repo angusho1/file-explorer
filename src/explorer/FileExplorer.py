@@ -72,10 +72,13 @@ class FileExplorer:
             self.curr_directory = parent_dir
         else:
             self.curr_directory = self.curr_directory.parent
+        self.selected_index = self.curr_directory.children.index(current_dir) # TODO: Use a faster method than index()
 
-    def traverse_right(self):
+    def traverse_right(self) -> int:
         """
         Move into the currently selected directory
+
+        Returns the index of the currently selected file entry.
 
         Raises an exception if the current selection is not a directory
         """
@@ -90,6 +93,7 @@ class FileExplorer:
         self.curr_directory = selection
         self.curr_directory.traverse_contents()
         self.selected_index = 0
+        return self.selected_index
 
     def peek_right(self) -> bool:
         """
