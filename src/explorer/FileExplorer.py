@@ -25,8 +25,7 @@ class FileExplorer:
 
     def select_by_index(self, index: int) -> FileEntry:
         """
-        Set the file entry at the given index as the current file entry, and return the file
-        entry. Returns None if the index is out of bounds.
+        Set the file entry at the given index as the current file entry, and return the file entry. Returns None if the index is out of bounds.
 
         Parameters:
 
@@ -35,7 +34,8 @@ class FileExplorer:
         if (index < 0 or index >= len(self.curr_directory.children)):
             return None
         else:
-            self.select_by_index = index
+            self.selected_index = index
+            self.curr_directory.select_child(self.selected_index)
             return self.get_selected_entry()
 
     def traverse_up(self) -> int:
@@ -47,6 +47,7 @@ class FileExplorer:
             self.selected_index = len(self.curr_directory.children) - 1
         else:
             self.selected_index -= 1
+        self.curr_directory.select_child(self.selected_index)
         return self.selected_index
 
     def traverse_down(self) -> int:
@@ -58,6 +59,7 @@ class FileExplorer:
             self.selected_index = 0
         else:
             self.selected_index += 1
+        self.curr_directory.select_child(self.selected_index)
         return self.selected_index
 
     def traverse_left(self):
@@ -65,6 +67,7 @@ class FileExplorer:
         Move backwards to the parent directory
         """
         current_dir = self.curr_directory
+        current_dir.select_child(self.selected_index) # Maintain history of selected child
         os.chdir('../')
         if self.curr_directory.parent is None:
             parent_dir = Directory()
@@ -91,8 +94,9 @@ class FileExplorer:
         if selection.parent is None:
             selection.set_parent(parent)
         self.curr_directory = selection
-        self.curr_directory.traverse_contents()
-        self.selected_index = 0
+        if self.curr_directory.children == None:
+            self.curr_directory.traverse_contents()
+        self.selected_index = self.curr_directory.get_curr_selected_child_index()
         return self.selected_index
 
     def peek_right(self) -> bool:

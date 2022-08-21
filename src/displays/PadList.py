@@ -1,4 +1,3 @@
-import curses
 from typing import List
 from src.explorer.FileEntry import FileEntry, Directory
 from src.explorer.FileExplorer import FileExplorer
@@ -53,10 +52,9 @@ class PadList:
         """
         curr_selection = self.fe.get_selected_entry()
         curr_dir_pad = self.get_current_dir_pad()
-        curr_dir_pad.deselect_file(curr_selection)
+        curr_dir_pad.deep_select_curr_file()
         curr_dir_pad.noutrefresh()
-        new_index = self.fe.traverse_left()
-        self._clear_peek_directory()
+        self.fe.traverse_left()
         if self.current == 0:
             new_dir = DirectoryPad(self.fe.curr_directory)
             self.dir_pads.insert(0, new_dir)
@@ -72,9 +70,11 @@ class PadList:
         if type(curr_selection) != Directory:
             return
         curr_dir_pad = self.get_current_dir_pad()
-        new_index = self.fe.traverse_right()
+        curr_dir_pad.deep_select_curr_file()
+        self.fe.traverse_right()
         self.current += 1
-        self._init_child_dir()
+        if self.current == len(self.dir_pads):
+            self._init_child_dir()
         self.refresh()
 
     def get_current_dir_pad(self) -> DirectoryPad:
@@ -97,7 +97,7 @@ class PadList:
                 dp.select_at_index(self.fe.selected_index)
 
     def _clear_peek_directory(self):
-        if len(self.dir_pads) > self.current + 1:
+        while len(self.dir_pads) > self.current + 1:
             prev_child_dir_pad = self.dir_pads.pop()
             prev_child_dir_pad.clear()
 

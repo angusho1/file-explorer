@@ -13,8 +13,7 @@ class DirectoryPad:
 
     - file_explorer : :class:`FileExplorer` --> the FileExplorer object used to read file entries for the current directory
     - directory : :class:`Directory` --> the directory being rendered in this view
-    - width : :class:`int` --> the total width (columns) for this directory pad, based on the
-    longest filename in the directory
+    - width : :class:`int` --> the total width (columns) for this directory pad, based on the longest filename in the directory
     - start_index : :class:`int` --> the row to start rendering at
     - offset : :class:`int` --> the column to start rendering at
     - pad --> the curses pad
@@ -23,6 +22,7 @@ class DirectoryPad:
         self.DIR_COLOR = curses.color_pair(1)
         self.FILE_COLOR = curses.color_pair(2)
         self.SELECTED_COLOR = curses.color_pair(3)
+        self.DEEP_DIR_COLOR = curses.color_pair(4)
 
         self.directory = directory
         self.width = self.get_width()
@@ -46,14 +46,12 @@ class DirectoryPad:
 
     def noutrefresh(self):
         """
-        Mark the pad for refresh. curses.doUpdate() must be called afterwards for the refresh to
-        take place.
+        Mark the pad for refresh. curses.doUpdate() must be called afterwards for the refresh to take place.
         """
         total_entries = self.get_num_entries()
         num_rows_to_display = total_entries-1 if total_entries <= curses.LINES else curses.LINES-1
         # (upper-left of pad start, upper-left of window, lower-right of window)
-        self.pad.noutrefresh(self.start_index, 0,  0,self.offset, curses.LINES-1, self.width
-                             - 1 + self.offset)
+        self.pad.noutrefresh(self.start_index, 0, 0, self.offset, curses.LINES-1, self.width - 1 + self.offset)
 
     def select_at_index(self, curr_index: int):
         """
@@ -80,6 +78,10 @@ class DirectoryPad:
             self.pad.chgat(self.DIR_COLOR)
         else:
             self.pad.chgat(self.FILE_COLOR)
+
+    def deep_select_curr_file(self):
+        # Apply a selection highlight to show the current file was previously selected
+        self.pad.chgat(self.DEEP_DIR_COLOR)
 
     def is_drawn(self):
         return hasattr(self, 'drawn')

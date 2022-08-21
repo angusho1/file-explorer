@@ -16,6 +16,7 @@ def start(stdscr):
     curses.init_pair(1, curses.COLOR_MAGENTA, -1)
     curses.init_pair(2, curses.COLOR_GREEN, -1)
     curses.init_pair(3, curses.COLOR_YELLOW, -1)
+    curses.init_pair(4, 143, -1) # Darker yellow
     curses.curs_set(0)
     stdscr.refresh()    # Need to call this before rendering anything
 

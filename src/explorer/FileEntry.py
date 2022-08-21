@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import List
 import os
 
 class FileEntry:
@@ -35,6 +36,11 @@ class FileEntry:
 class Directory(FileEntry):
     """
     A directory in the file system.
+
+    - Attributes:
+
+    - children : :class:`List[FileEntry]` --> a list of files contained in this directory
+    - selected_child_index :class:`int` --> index of the currently selected child
     """
     def __init__(self, dir: str = None, name: str = None, parent: Directory = None) -> None:
         if dir is None or name is None or parent is None:
@@ -42,12 +48,22 @@ class Directory(FileEntry):
         else:
             super().__init__(dir, name, parent)
         self.children = None
+        self.selected_child_index = 0
 
     def _set_children(self, children: List[FileEntry]) -> None:
         self.children = children
 
     def get_child(self, index: int) -> FileEntry:
         return self.children[index]
+    
+    def select_child(self, index: int):
+        self.selected_child_index = index
+
+    def get_curr_selected_child_index(self):
+        return self.selected_child_index
+
+    def get_curr_selected_child(self):
+        return self.children[self.selected_child_index]
 
     def traverse_contents(self, existing_child: FileEntry = None) -> None:
         """
