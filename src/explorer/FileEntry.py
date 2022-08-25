@@ -32,6 +32,9 @@ class FileEntry:
         Returns the full path of the file entry.
         """
         return os.path.join(self.dir, self.name)
+    
+    def contains_child_dirs(self):
+        return False
 
 class Directory(FileEntry):
     """
@@ -49,6 +52,7 @@ class Directory(FileEntry):
             super().__init__(dir, name, parent)
         self.children = None
         self.selected_child_index = 0
+        self.contains_dirs = False
 
     def _set_children(self, children: List[FileEntry]) -> None:
         self.children = children
@@ -62,8 +66,13 @@ class Directory(FileEntry):
     def get_curr_selected_child_index(self):
         return self.selected_child_index
 
-    def get_curr_selected_child(self):
+    def get_curr_selected_child(self) -> FileEntry:
         return self.children[self.selected_child_index]
+
+    def contains_child_dirs(self) -> bool:
+        if not self.contains_dirs and self.children is not None:
+            return len(self.children) > 0 and type(self.children[0]) == Directory
+        return self.contains_dirs
 
     def traverse_contents(self, existing_child: FileEntry = None) -> None:
         """
@@ -79,6 +88,9 @@ class Directory(FileEntry):
         full_path = self.get_path()
         traverser = os.walk(full_path)
         root, dirs, files = traverser.__next__()
+
+        if len(dirs) > 0:
+            self.contains_dirs = True
 
         if existing_child is None:
             results = list(map(lambda dir: Directory(full_path, dir, self), dirs))
