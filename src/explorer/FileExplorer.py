@@ -66,6 +66,9 @@ class FileExplorer:
         """
         Move backwards to the parent directory
         """
+        if self.curr_directory.name == '':
+            raise Exception('Cannot traverse left on root directory')
+
         current_dir = self.curr_directory
         current_dir.select_child(self.selected_index) # Maintain history of selected child
         os.chdir('../')

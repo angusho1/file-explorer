@@ -58,15 +58,13 @@ class PadList:
         """
         Move into the parent directory, creating one if it doesn't exist
         """
-        curr_selection = self.fe.get_selected_entry()
-        curr_dir_pad = self.get_current_dir_pad()
-        curr_dir_pad.deep_select_curr_file()
-        curr_dir_pad.noutrefresh()
         try:
             self.fe.traverse_left()
         except:
-            curr_dir_pad.select_at_index(self.fe.selected_index)
             return
+        curr_dir_pad = self.get_current_dir_pad()
+        curr_dir_pad.deep_select_curr_file()
+        curr_dir_pad.noutrefresh()
         if self.current == 0:
             new_dir = DirectoryPad(self.fe.curr_directory)
             self.dir_pads.insert(0, new_dir)
@@ -110,7 +108,8 @@ class PadList:
         shown_dp_index = self.current + 1 if curr_pad_contains_child else self.current
 
         offset = current_pad.offset if render_from_current else self.left_padding
-        i = self.current if render_from_current else self.leftmost_index
+        offset = 0 if self.current < self.leftmost_index else offset
+        i = self.current if render_from_current or self.current < self.leftmost_index else self.leftmost_index  # Set leftmost pad to start rendering from
         dp: DirectoryPad
         while i < shown_dp_index:
             dp = self.dir_pads[i]
@@ -123,6 +122,7 @@ class PadList:
             start_at = self.current + 1 if curr_pad_contains_child else self.current
             self._refresh_rtl(start_at)
         else:
+            self.leftmost_index = self.current if self.current < self.leftmost_index else self.leftmost_index   # Index of furthest left pad visible on the screen
             self._refresh_ltr(render_from_current)
     
     def _refresh_ltr(self, render_from_current=False):
@@ -146,13 +146,14 @@ class PadList:
             return
         dp: DirectoryPad = self.dir_pads[start]
         i = start
-        offset = curses.COLS - dp.width
+        offset = curses.COLS
         while i >= 0 and offset >= 0:
             dp = self.dir_pads[i]
-            dp.render_at_col(offset)
+            offset -= dp.width
+            col = offset + dp.width if offset < 0 else offset
+            dp.render_at_col(col, render_from_left=False if offset < 0 else True)
             if i == self.current:
                 dp.select_at_index(self.fe.selected_index)
-            offset -= dp.width
             i -= 1
 
         self.leftmost_index = i+1

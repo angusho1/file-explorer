@@ -68,12 +68,17 @@ class DirectoryPad:
         - col : :class:`int` --> the column to start rendering the pad at
         - render_from_left : :class:`bool` --> if True, render the pad's content from left to right. Default value is True
         """
-        self.set_offset(col)
-        if col + self.width < curses.COLS:
-            self.set_max_cols(self.width)
+        if not render_from_left: # Render at left edge of screen
+            self.set_offset(0)
+            self.set_render_from_left(False) 
+            self.set_max_cols(col)
         else:
-            self.set_max_cols(curses.COLS - col)    # Number of columns that the pad will get to render before hitting an edge of the screen
-        self.set_render_from_left(render_from_left)
+            self.set_offset(col)
+            if col + self.width < curses.COLS:
+                self.set_max_cols(self.width)
+            else:
+                self.set_max_cols(curses.COLS - col)    # Number of columns that the pad will get to render before hitting an edge of the screen
+            self.set_render_from_left(render_from_left)
         if not self.is_drawn():
             self.draw()
         else:
