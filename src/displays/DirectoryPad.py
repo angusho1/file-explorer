@@ -2,8 +2,11 @@ import curses
 from typing import List
 from src.explorer.FileEntry import FileEntry, Directory
 from src.explorer.FileExplorer import FileExplorer
-import pyperclip
+import os
 
+MAX_FILENAME_LEN = 35
+ELLIPSIS_LEN = 2
+NO_EXT_LAST_N = 3
 
 class DirectoryPad:
     """
@@ -42,9 +45,9 @@ class DirectoryPad:
         self.pad.clear()
         for i, entry in enumerate(self._get_file_entries()):
             if type(entry) == Directory:
-                self.pad.addstr(f'{entry.name}\n', self.DIR_COLOR)
+                self.pad.addstr(f'{self._get_display_str(entry.name)}\n', self.DIR_COLOR)
             else:
-                self.pad.addstr(f'{entry.name}\n', self.FILE_COLOR)
+                self.pad.addstr(f'{self._get_display_str(entry.name)}\n', self.FILE_COLOR)
         self.drawn = True
         self.noutrefresh()
 
@@ -99,7 +102,7 @@ class DirectoryPad:
         return len(self._get_file_entries())
 
     def get_width(self) -> int:
-        return self._get_max_filename_len() + 1
+        return min(self._get_max_filename_len(), MAX_FILENAME_LEN) + 1
 
     def set_offset(self, offset: int):
         self.offset = offset
@@ -128,6 +131,21 @@ class DirectoryPad:
         self.pad.move(0, 0)
         self.pad.clear()
         self.noutrefresh()
+
+    def _get_display_str(self, filename: str) -> str:
+        if len(filename) <= MAX_FILENAME_LEN:
+            return filename
+        
+        _, file_extension = os.path.splitext(filename)
+        res: str
+        if len(file_extension) > 0:
+            first_n = MAX_FILENAME_LEN - len(file_extension) - ELLIPSIS_LEN
+            res = filename[:first_n] + ('.' * ELLIPSIS_LEN) + file_extension
+        else:
+            last_chars = filename[-NO_EXT_LAST_N:]
+            first_n = MAX_FILENAME_LEN - NO_EXT_LAST_N - ELLIPSIS_LEN
+            res = filename[:first_n] + ('.' * ELLIPSIS_LEN) + last_chars
+        return res
 
     def _get_max_filename_len(self) -> int:
         longest_name_file = max(self._get_file_entries(), key=lambda x: len(x.name), default=None)
