@@ -88,6 +88,8 @@ class Directory(FileEntry):
         full_path = self.get_path()
         traverser = os.walk(full_path)
         root, dirs, files = traverser.__next__()
+        dirs.sort(key=str.lower)
+        files.sort(key=str.lower)
 
         if len(dirs) > 0:
             self.contains_dirs = True
