@@ -127,7 +127,8 @@ class FileExplorer:
         selection = self.get_selected_entry()
         if type(selection) == Directory:
             rel_path = os.path.relpath(selection.name, self.start)
-            pyperclip.copy(f'cd {rel_path}')
+            escaped_path = rel_path.replace(' ', '\ ')
+            pyperclip.copy(f'cd {escaped_path}')
             return selection
         return None
 
