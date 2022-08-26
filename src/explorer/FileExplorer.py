@@ -1,4 +1,4 @@
-import os
+import os, subprocess, platform
 from typing import List
 from src.explorer.FileEntry import FileEntry, Directory
 import pyperclip
@@ -131,6 +131,20 @@ class FileExplorer:
             pyperclip.copy(f'cd {escaped_path}')
             return selection
         return None
+
+    def open_file(self):
+        """
+        Open file using default OS application
+        """
+        # Ref: https://stackoverflow.com/questions/434597/open-document-with-default-os-application-in-python-both-in-windows-and-mac-os
+        selection = self.get_selected_entry()
+        if type(selection) != Directory:
+            if platform.system() == 'Darwin':       # macOS
+                subprocess.call(('open', selection.name))
+            elif platform.system() == 'Windows':    # Windows
+                os.startfile(selection.name)
+            else:                                   # linux variants
+                subprocess.call(('xdg-open', selection.name))
 
     def _get_curr_directory(self) -> Directory:
         # Get the current Directory object, creating it if it doesn't exist

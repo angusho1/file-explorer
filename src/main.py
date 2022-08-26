@@ -40,7 +40,10 @@ def start(stdscr):
         elif k == curses.KEY_RIGHT:
             directory_view.traverse_right()
         elif k == 10:
-            fe.copy_path()
+            if type(fe.get_selected_entry()) == Directory:
+                fe.copy_path()
+            else:
+                fe.open_file()
             break
         if k == ord('q'):
             break
