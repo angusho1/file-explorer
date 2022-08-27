@@ -108,6 +108,8 @@ class FileExplorer:
 
         Returns true if a directory was parsed, false otherwise
         """
+        if len(self.curr_directory.children) == 0:
+            return False
         selection = self.get_selected_entry()
         parent = self.curr_directory
 

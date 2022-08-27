@@ -67,6 +67,8 @@ class Directory(FileEntry):
         return self.selected_child_index
 
     def get_curr_selected_child(self) -> FileEntry:
+        if len(self.children) == 0:
+            return None
         return self.children[self.selected_child_index]
 
     def contains_child_dirs(self) -> bool:
@@ -87,7 +89,11 @@ class Directory(FileEntry):
         """
         full_path = self.get_path()
         traverser = os.walk(full_path)
-        root, dirs, files = traverser.__next__()
+        try:
+            root, dirs, files = traverser.__next__()
+        except:
+            self._set_children([])
+            return
         dirs.sort(key=str.lower)
         files.sort(key=str.lower)
 

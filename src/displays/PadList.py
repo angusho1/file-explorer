@@ -79,6 +79,8 @@ class PadList:
         curr_selection = self.fe.get_selected_entry()
         if type(curr_selection) != Directory:
             return
+        if len(self.fe.get_selected_entry().children) == 0: # Directory is empty
+            return
         curr_dir_pad = self.get_current_dir_pad()
         curr_dir_pad.deep_select_curr_file()
         self.fe.traverse_right()
@@ -102,7 +104,8 @@ class PadList:
         - render_from_current : :class:`bool` --> if True, only re-render DirectoryPads to the right of the current one, unless the pads need to be shifted left. Default value is False
         """
         current_pad: DirectoryPad = self.get_current_dir_pad()
-        curr_pad_contains_child = current_pad.directory.get_curr_selected_child().contains_child_dirs()
+        selected_pad = current_pad.directory.get_curr_selected_child()
+        curr_pad_contains_child = False if selected_pad is None else current_pad.directory.get_curr_selected_child().contains_child_dirs()
 
         # Index of the furthest-right DirectoryPad that must be shown on screen fully
         shown_dp_index = self.current + 1 if curr_pad_contains_child else self.current
